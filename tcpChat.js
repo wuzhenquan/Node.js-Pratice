@@ -1,6 +1,6 @@
-const net = require('net')
+const net = require('net') // net 是 TCP 模块
 let count = 0, users = {}
-// 创建服务器
+// 用 TCP 模块创建一个服务
 const server = net.createServer((conn) => {
     let nickname
     // conn 对象是 net.Stream
@@ -13,39 +13,35 @@ const server = net.createServer((conn) => {
     )
     count++
     conn.setEncoding('utf8')
+    // 注册客户端穿数据过来的监听事件
     conn.on('data', (data) => {
         data = data.replace('\r\n', '') // 删除回车符
         // 接收到的第一份数据应当是用户输入的昵称
         if (!nickname) {
             if (users[data]) {
-                conn.write(`${nickname} already in use. tra again:`)
+                conn.write(`${nickname} already in use. try again:`)
                 return;
             } else {
                 nickname = data
                 users[nickname] = conn
-                for (let i in users) {
-                    users[i].write(`> ${nickname} joined the room \n`)
-                }
+                broadcast(`> ${nickname} joined the room \n`)
             }
         } else {
             // 否则 视为聊天信息
-            for (let i in users) {
-                if (i != nickname) {
-                    users[i].write(`${nickname} ${data} \n`)
-                }
-            }
+            broadcast(`${nickname} ${data} \n`)
         }
     })
     // 注册 close 事件检查客户端是否断ß开连接
     conn.on('close', () => {
         count--
         delete users[nickname]
-        broadcast(`${nickname} left the room \n`)
+        broadcast(`${nickname} left the room \n`, true)
     })
-    // 给用户的广播
+    // 发给用户的信息（包括加入聊天室，聊天信息，退出聊天）
     function broadcast(msg, exceptMyself) {
-        for (var i in users) {
+        for (let i in users) {
             if (!exceptMyself || i != nickname) {
+                // users[i] 是 conn
                 users[i].write(msg)
             }
         }
