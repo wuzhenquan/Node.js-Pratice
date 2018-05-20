@@ -3,7 +3,7 @@ let count = 0, users = {}
 // 用 TCP 模块创建一个服务
 const server = net.createServer((conn) => {
     let nickname
-    // conn 对象是 net.Stream
+    // conn（connection） 对象是 net.Stream
     conn.write(
         `
         \n > welcome to node-chat
