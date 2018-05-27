@@ -14,6 +14,7 @@ fs.readdir(process.cwd(), (err, files) => {
 	function file(i) {
 		const filename = files[i]
 
+		// 获取文件的状态
 		fs.stat(__dirname + '/' + filename, (err, stat) => {
 			stats[i] = stat
 			if (stat.isDirectory()) {

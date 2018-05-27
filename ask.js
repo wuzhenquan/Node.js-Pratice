@@ -11,7 +11,8 @@ function ask(i) {
     process.stdout.write(' > ')
 }
 
-// this means that when a user types some data into the terminal and hits enter we will raise this data event here
+// this means that when a user types some data into the terminal 
+// and hits enter we will raise this data event here
 process.stdin.on('data', (data) => {
     answers.push(data.toString().trim())
     if (answers.length < questions.length) {
