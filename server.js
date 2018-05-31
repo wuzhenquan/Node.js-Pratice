@@ -1,7 +1,27 @@
 const http = require('http')
 const connect = require('connect') // https://github.com/senchalabs/connect
 const morgan = require('morgan') // https://www.npmjs.com/package/morgan
-const time = require('./requestTime.js') // 自己写的一个中间件
+
+// 自己写的一个中间件
+const time = (opts) => {
+    let time = opts.time || 100
+    return (req, res, next) => {
+        let timer = setTimeout(() => {
+            console.log(
+                'taking too long'
+                , req.method
+                , req.url
+            )
+        }, time);
+        let end = res.end
+        res.end = function (chunk, encoding) {
+            res.end = end
+            res.end(chunk, encoding)
+            clearTimeout(timer)
+        }
+        next()
+    }
+} 
 
 const app = connect()
 app.use(morgan('dev'))
