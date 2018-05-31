@@ -1,3 +1,4 @@
+// 自己写的一个中间价
 module.exports = (opts) => {
     let time = opts.time || 100
     return (req, res, next) => {

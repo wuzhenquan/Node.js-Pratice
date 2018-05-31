@@ -1,7 +1,7 @@
 const http = require('http')
 const connect = require('connect') // https://github.com/senchalabs/connect
 const morgan = require('morgan') // https://www.npmjs.com/package/morgan
-const time = require('./requestTime.js')
+const time = require('./requestTime.js') // 自己写的一个中间件
 
 const app = connect()
 app.use(morgan('dev'))
