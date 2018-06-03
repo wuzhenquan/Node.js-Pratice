@@ -8,7 +8,7 @@ const cookieSession = require('cookie-session') // https://www.npmjs.com/package
 const users = { "tobi": { "password": "ferret", "name": "Tobi Holowaychuk" } }
 const app = connect()
 app.use(morgan('dev'))
-app.use(bodyParser.urlencoded()) // 解析查询字符串为对象的格式
+app.use(bodyParser.urlencoded({ extended: true })) // 解析查询字符串为对象的格式
 app.use(cookieParser())
 app.use(cookieSession({ secret: 'my app secret' }))
 
