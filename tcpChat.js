@@ -1,3 +1,7 @@
+// 聊天程序这样的应用，没有必要每次都发送头信息，理想的方式得从 TCP 而非 HTTP 入手
+// 若想要在 web 下做一个聊天程序，建议 WebSocket，WebSocket 是 Web 下的 TCP
+// WebSocket 还是建立在 HTTP 之上的，它与 HTTP 之间的主要区别就是，
+// 握手完成后，客户端和服务端就建立了类似 TCP socket 这样的通道
 const net = require('net') // net 是 TCP 模块
 let count = 0, users = {}
 // 用 TCP 模块创建一个服务
@@ -13,7 +17,7 @@ const server = net.createServer((conn) => {
     )
     count++
     conn.setEncoding('utf8')
-    // 注册客户端穿数据过来的监听事件
+    // 注册客户端传数据过来的监听事件
     conn.on('data', (data) => {
         data = data.replace('\r\n', '') // 删除回车符
         // 接收到的第一份数据应当是用户输入的昵称
@@ -31,7 +35,7 @@ const server = net.createServer((conn) => {
             broadcast(`${nickname} ${data} \n`)
         }
     })
-    // 注册 close 事件检查客户端是否断ß开连接
+    // 注册 close 事件检查客户端是否断开连接
     conn.on('close', () => {
         count--
         delete users[nickname]

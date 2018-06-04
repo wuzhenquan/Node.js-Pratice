@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<head>
+    <title>WebSocket echo test</title>
+    <script>
+        let lastMessage; // 定义一个存储延时的变量
+        window.onload = () => {
+            // 初始化 WebSocket 并和服务器建立连接
+            const ws = new WebSocket('ws://localhost:3000')
+            // 建立连接后向服务器端发送第一条消息
+            ws.onopen = () => {
+                ping()
+            }
+            // 收到服务器端响应后计算耗时，并再次发出一条消息
+            ws.onmessage = (ev)=>{
+                console.log(`got${ev.data}`)
+                // you got echo back, measure latency
+                document.getElementById('latency').innerHTML = new Date - lastMessage
+                // ping again
+                ping()
+            }
+            // ping 函数用于记录发送消息前的时间戳用语计算最终耗时（也就是上面注释里说的延时），随后发送一条简单的消息给服务器
+            const ping = ()=>{
+                // record the timestamp
+                lastMessage = +new Date
+                // send the message
+                ws.send('ping')
+            }
+        }
+    </script>
+    <body>
+        <h1>WebSocket Echo</h1>
+        <h2>Latency: <span id="latency"></span><ms/h2>
+    </body>
+</head>
+</html>
