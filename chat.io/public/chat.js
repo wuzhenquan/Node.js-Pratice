@@ -17,12 +17,16 @@ window.onload = () => {
         li.className = 'message'
         li.innerHTML = `<b>${from}</b>: ${text}`
         document.querySelector('#messages').appendChild(li)
+        return li
     }
 
     const input = document.querySelector('#input')
     document.querySelector('#button').onclick = function () {
-        addMessage('me', input.value)
-        socket.emit('text', input.value) // 发送消息
+        const li = addMessage('me', input.value)
+        socket.emit('text', input.value, (date) => {
+            li.className = 'confirmed'
+            li.title = date
+        }) // 发送消息
 
         // 重置输入框
         input.value = ''
@@ -31,5 +35,5 @@ window.onload = () => {
         return false
     }
 
-    socket.on('text',addMessage) // 接受服务端发送过来的消息
+    socket.on('text', addMessage) // 接受服务端发送过来的消息
 }

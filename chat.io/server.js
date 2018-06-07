@@ -18,7 +18,8 @@ io.sockets.on('connection', (socket) => {
     })
 
     // 接受客户端发来的消息
-    socket.on('text', function (msg) {
+    socket.on('text', function (msg, callback) {
         socket.broadcast.emit('text', socket.nickname, msg) // 发送消息到客户端
+        callback(Date.now())
     })
 })
