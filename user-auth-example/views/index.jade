@@ -1,7 +1,7 @@
 extends ./layout.jade
 block body
   if authenticated
-    p Welcome back, #{me.first}
+    p Welcome back, #{me.first}#{me.last}
     a(href="/logout") Logout
   else
     p Welcome new visitor
