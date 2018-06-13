@@ -48,10 +48,10 @@ module.exports = {
             "off", // 是否用双引号的检查关掉
             "double"
         ],
-        // "semi": [
-        //     "warn", // 推荐分号结尾, 其实我也不喜欢加分号
-        //     "always"
-        // ],
+        "semi": [
+            "warn", // 推荐分号结尾, 其实我也不喜欢加分号
+            "always"
+        ],
         "no-unused-vars": [ // 推荐不要出现未使用过的变量
             "warn",
             { "vars": "all", "args": "after-used" }
