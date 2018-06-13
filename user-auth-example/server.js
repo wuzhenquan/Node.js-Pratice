@@ -2,19 +2,17 @@ const express = require('express')
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
-const cookieSession = require('cookie-session') // https://www.npmjs.com/package/cookie-session
+const cookieSession = require('cookie-session')
 
 const app = express()
 
 app.listen(3000)
 
-app.use(bodyParser.urlencoded({ extended: true })) // 解析查询字符串为对象的格式
+app.use(express.urlencoded({ extended: true })) // 解析查询字符串为对象的格式
 app.use(cookieParser())
 app.use(cookieSession({ secret: 'my app secret' }))
 
 app.set('view engine', 'jade')
-
-
 
 mongoose.connect('mongodb://127.0.0.1/my-website')
 const db = mongoose.connection
@@ -28,7 +26,6 @@ const User = mongoose.model('User', new Schema({
     email: { type: String, unique: true },
     password: { type: String, unique: true },
 }))
-
 
 app.use((req, res, next) => {
     if (req.session.loggedIn) {
