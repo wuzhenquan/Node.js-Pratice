@@ -1,15 +1,16 @@
-var createError = require('http-errors')
-var express = require('express')
-var path = require('path')
-var cookieParser = require('cookie-parser')
-var logger = require('morgan')
+const createError = require('http-errors')
+const express = require('express')
+const path = require('path')
+const cookieParser = require('cookie-parser') // Using express-sessions with express 4, cookieParser is no longer required.
+const logger = require('morgan')
 const session = require('express-session')
 const MongoStore = require('connect-mongo')(session)
 
-var routes = require('./routes/index')
+const routes = require('./routes/index')
 const settings = require('./settings')
+const flash = require('connect-flash')
 
-var app = express()
+const app = express()
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
@@ -20,37 +21,36 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
-
+app.use(session({
+    secret: settings.cookieSecret,
+    key: settings.db, // cookie name
+    cookie: { maxAge: 1000 * 60 * 60 * 24 * 30 }, // 30 days
+    resave: true,
+    saveUninitialized: true,
+    store: new MongoStore({
+        db: settings.db,
+        host: settings.host,
+        port: settings.port,
+        url: settings.url,
+    })
+}))
+app.use(flash())
 routes(app)
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
-  next(createError(404))
+    next(createError(404))
 })
 
 // error handler
 app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message
-  res.locals.error = req.app.get('env') === 'development' ? err : {}
+    // set locals, only providing error in development
+    res.locals.message = err.message
+    res.locals.error = req.app.get('env') === 'development' ? err : {}
 
-  // render the error page
-  res.status(err.status || 500)
-  res.render('error')
+    // render the error page
+    res.status(err.status || 500)
+    res.render('error')
 })
-
-app.use(session({
-  secret: settings.cookieSecret,
-  key: settings.db, // cookie name
-  cookie: {maxAge : 1000 * 60 * 60 * 24 * 30}, // 30 days
-  resave: true,
-  saveUninitialized: true,
-  store: new MongoStore({
-    db: settings.db,
-    host: settings.host,
-    port: settings.port,
-    url: settings.url,
-  })
-}))
 
 module.exports = app
