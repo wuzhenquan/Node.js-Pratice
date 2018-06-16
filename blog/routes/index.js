@@ -1,6 +1,6 @@
 module.exports = function (app) {
   app.get('/', (req, res) => {
-    res.render('index', { title: 'Express' })
+    res.render('index', { title: 'home' })
   })
   app.get('/reg', (req, res) => {
     res.render('reg', { title: 'register' })
