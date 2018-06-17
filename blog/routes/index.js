@@ -1,5 +1,24 @@
 const crypto = require('crypto') // Node.js 的核心模块，用来生成散列值来加密密码
 const User = require('../models/user')
+
+// 登陆了才能 next()
+function checkLogin(req, res, next){
+    if(!req.session.user){
+        req.flash('error','未登录')
+        res.redirect('/login')
+    }
+    next()
+}
+
+// 没登陆才能 next()
+function checkNotLogin(req, res, next){
+    if(req.session.user){
+        req.flash('error','已登录')
+        res.redirect('back') // 返回之前的页面
+    }
+    next()
+}
+
 module.exports = function (app) {
     app.get('/', (req, res) => {
         res.render('index', {
@@ -9,6 +28,7 @@ module.exports = function (app) {
             error: req.flash('error').toString()
         })
     })
+    app.get('/reg', checkNotLogin)
     app.get('/reg', (req, res) => {
         res.render('reg', { 
             title: 'register',
@@ -17,6 +37,7 @@ module.exports = function (app) {
             error: req.flash('error').toString()
         })
     })
+    app.post('/reg', checkNotLogin)
     app.post('/reg', (req, res) => {
         let password = req.body.password
         const password_re = req.body['password-repeat']
@@ -54,6 +75,7 @@ module.exports = function (app) {
             })
         })
     })
+    app.get('/login', checkNotLogin)
     app.get('/login', (req, res) => {
         res.render('login', { 
             title: 'login',
@@ -62,6 +84,7 @@ module.exports = function (app) {
             error: req.flash('error').toString()
          })
     })
+    app.post('/login', checkNotLogin)
     app.post('/login', (req, res) => {
         // 生成密码的 md5 值
         const md5 = crypto.createHash('md5')
@@ -84,11 +107,14 @@ module.exports = function (app) {
             res.redirect('/')
         })
     })
+    app.get('/post', checkLogin)
     app.get('/post', (req, res) => {
         res.render('post', { title: 'posts' })
     })
+    app.post('/post', checkLogin)
     app.post('/post', (req, res) => {
     })
+    app.get('/logout', checkLogin)
     app.get('/logout', (req, res) => {
         req.session.user = null
         req.flash('success', '登出成功')
