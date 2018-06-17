@@ -3,13 +3,22 @@ const User = require('../models/user')
 const assert = require('assert')
 module.exports = function (app) {
     app.get('/', (req, res) => {
-        res.render('index', { title: 'home' })
+        res.render('index', {
+            title: 'home',
+            user: req.session.user || {},
+            success: req.flash('success').toString(),
+            error: req.flash('error').toString()
+        })
     })
     app.get('/reg', (req, res) => {
-        res.render('reg', { title: 'register' })
+        res.render('reg', { 
+            title: 'register',
+            user: req.session.user || {},
+            success: req.flash('success').toString(),
+            error: req.flash('error').toString()
+        })
     })
     app.post('/reg', (req, res) => {
-        console.log(req.session,'req.session')
         let password = req.body.password
         const password_re = req.body['password-repeat']
         if (password != password_re) {
@@ -36,12 +45,12 @@ module.exports = function (app) {
             }
             // 如果不存在则新增用户
             newUser.save((err, user) => {
-                if(err){
-                    req.flash('error',err)
+                if (err) {
+                    req.flash('error', err)
                     return res.redirect('/reg')
                 }
                 req.session.user = user // 用户信息存入 session
-                req.flash('success','注册成功')
+                req.flash('success', '注册成功')
                 res.redirect('/')
             })
         })

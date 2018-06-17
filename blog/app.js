@@ -8,7 +8,7 @@ const MongoStore = require('connect-mongo')(session)
 
 const routes = require('./routes/index')
 const settings = require('./settings')
-const flash = require('connect-flash')
+const flash = require('connect-flash') // 源码才 32 行
 
 const app = express()
 
