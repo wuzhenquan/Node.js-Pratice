@@ -27,7 +27,7 @@ module.exports = function (app) {
         }
         // 生成密码的 md5 值
         const md5 = crypto.createHash('md5')
-        password = md5.update(req.body.password).digest('hes')
+        password = md5.update(req.body.password).digest('hex')
         const newUser = new User({
             name: req.body.name,
             password: password,
@@ -56,9 +56,34 @@ module.exports = function (app) {
         })
     })
     app.get('/login', (req, res) => {
-        res.render('login', { title: 'login' })
+        res.render('login', { 
+            title: 'login',
+            user: {},
+            success: req.flash('success').toString(),
+            error: req.flash('error').toString()
+         })
     })
     app.post('/login', (req, res) => {
+        // 生成密码的 md5 值
+        const md5 = crypto.createHash('md5')
+        const password = md5.update(req.body.password).digest('hex')
+        // 检查用户是否存在
+        User.get(req.body.name, (err, users)=>{
+            const user = users[0]
+            if(user.length === 0){
+                req.flash('error', '用户不存在')
+                return res.redirect('/login')
+            }
+            // 检查密码是否一致
+            if (password !== user.password){
+                req.flash('error', '密码错误')
+                return res.redirect('/login')
+            }
+            // 用户名密码都匹配后，将用户信息存入 session
+            req.session.user = user
+            req.flash('success', '登录成功')
+            res.redirect('/')
+        })
     })
     app.get('/post', (req, res) => {
         res.render('post', { title: 'posts' })
