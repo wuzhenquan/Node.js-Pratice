@@ -1,11 +1,10 @@
 const crypto = require('crypto') // Node.js 的核心模块，用来生成散列值来加密密码
 const User = require('../models/user')
-const assert = require('assert')
 module.exports = function (app) {
     app.get('/', (req, res) => {
         res.render('index', {
             title: 'home',
-            user: req.session.user || {},
+            user: req.session.user || null,
             success: req.flash('success').toString(),
             error: req.flash('error').toString()
         })
@@ -13,7 +12,7 @@ module.exports = function (app) {
     app.get('/reg', (req, res) => {
         res.render('reg', { 
             title: 'register',
-            user: req.session.user || {},
+            user: req.session.user || null,
             success: req.flash('success').toString(),
             error: req.flash('error').toString()
         })
@@ -58,7 +57,7 @@ module.exports = function (app) {
     app.get('/login', (req, res) => {
         res.render('login', { 
             title: 'login',
-            user: {},
+            user: null,
             success: req.flash('success').toString(),
             error: req.flash('error').toString()
          })
@@ -91,5 +90,8 @@ module.exports = function (app) {
     app.post('/post', (req, res) => {
     })
     app.get('/logout', (req, res) => {
+        req.session.user = null
+        req.flash('success', '登出成功')
+        res.redirect('/')
     })
 }
