@@ -1,5 +1,6 @@
 const MongoClient = require('mongodb').MongoClient;
 const settings = require('../settings')
+const markdown = require('markdown').markdown
 
 function Post(post) {
     this.name = post.name
@@ -49,6 +50,11 @@ Post.get = function (name, callback) {
             if (err) {
                 return callback(err)
             }
+            posts = posts.map(post=>{
+                console.log(markdown,'markdown')
+                post.post = markdown.toHTML(post.post)
+                return post
+            })
             callback(null, posts)
         })
         client.close()

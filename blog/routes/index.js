@@ -1,6 +1,7 @@
 const crypto = require('crypto') // Node.js 的核心模块，用来生成散列值来加密密码
 const User = require('../models/user')
 const Post = require('../models/post')
+const markdown = require('markdown')
 
 // 登陆了才能 next()
 function checkLogin(req, res, next) {
@@ -26,6 +27,7 @@ module.exports = function (app) {
             if (err) {
                 posts = []
             }
+            console.log(req.session.user,'req.session.user')
             res.render('index', {
                 title: 'home',
                 user: req.session.user || null,
@@ -99,7 +101,7 @@ module.exports = function (app) {
         // 检查用户是否存在
         User.get(req.body.name, (err, users) => {
             const user = users[0]
-            if (user.length === 0) {
+            if (!user || user.length === 0) {
                 req.flash('error', '用户不存在')
                 return res.redirect('/login')
             }
