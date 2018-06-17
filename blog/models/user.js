@@ -22,15 +22,15 @@ User.prototype.save = function (callback) {
 
     // 连接数据库
     MongoClient.connect(settings.url, function (err, client) {
-        const db = client.db(settings.db);
-        const collection = db.collection('users');
+        const db = client.db(settings.db)
+        const collection = db.collection('users')
         collection.insertMany([user], (err, users) => {
             if (err) {
                 return callback(err)
             }
             callback(null, users.ops[0])
         })
-        client.close();
+        client.close()
     });
 }
 
@@ -38,9 +38,9 @@ User.prototype.save = function (callback) {
 User.get = function (name, callback) {
     // 连接数据库
     MongoClient.connect(settings.url, function (err, client) {
-        const db = client.db(settings.db);
+        const db = client.db(settings.db)
         // 读取 users 集合
-        const collection = db.collection('users');
+        const collection = db.collection('users')
         collection.find({ name }).toArray((err, users) => {
             if (err) {
                 return callback(err)
