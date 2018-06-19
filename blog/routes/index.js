@@ -1,7 +1,8 @@
 const crypto = require('crypto') // Node.js 的核心模块，用来生成散列值来加密密码
 const User = require('../models/user')
 const Post = require('../models/post')
-const markdown = require('markdown')
+const multer = require('multer')
+const upload = multer({ dest: './public/images' })
 
 // 登陆了才能 next()
 function checkLogin(req, res, next) {
@@ -27,7 +28,6 @@ module.exports = function (app) {
             if (err) {
                 posts = []
             }
-            console.log(req.session.user,'req.session.user')
             res.render('index', {
                 title: 'home',
                 user: req.session.user || null,
@@ -147,5 +147,19 @@ module.exports = function (app) {
         req.session.user = null
         req.flash('success', '登出成功')
         res.redirect('/')
+    })
+    app.get('/upload', checkLogin)
+    app.get('/upload', (req, res) => {
+        res.render('upload', {
+            title: 'file upload',
+            user: req.session.user,
+            success: req.flash('success').toString(),
+            error: req.flash('error').toString()
+        })
+    })
+    app.post('/upload', checkLogin)
+    app.post('/upload', upload.array('file1'), (req, res) => {
+        req.flash('success', '文件上传成功')
+        res.redirect('/upload')
     })
 }
