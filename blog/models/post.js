@@ -60,7 +60,7 @@ Post.getAll = function (name, callback) {
     })
 }
 
-// 读取单条博客信息
+// 读取单条博客信息(HTML 格式)
 Post.getOne = function (name, day, title, callback) {
     MongoClient.connect(settings.url, (err, client) => {
         const db = client.db(settings.db)
@@ -75,6 +75,46 @@ Post.getOne = function (name, day, title, callback) {
                 return callback(err)
             }
             post.post = markdown.toHTML(post.post)
+            callback(null, post)
+        })
+        client.close()
+    })
+}
+
+// 读取单条博客信息(MarkDown 格式)
+Post.edit = function (name, day, title, callback) {
+    MongoClient.connect(settings.url, (err, client) => {
+        const db = client.db(settings.db)
+        const collection = db.collection('posts')
+        const query = {
+            name: name,
+            "time.day": day,
+            title: title
+        }
+        collection.findOne(query, null, (err, post) => {
+            if (err) {
+                return callback(err)
+            }
+            callback(null, post)
+        })
+        client.close()
+    })
+}
+
+// 更新文章
+Post.update = function (name, day, title, post, callback) {
+    MongoClient.connect(settings.url, (err, client) => {
+        const db = client.db(settings.db)
+        const collection = db.collection('posts')
+        const query = {
+            name: name,
+            "time.day": day,
+            title: title
+        }
+        collection.update(query, { $set: { post: post } }, (err, post) => {
+            if (err) {
+                return callback(err)
+            }
             callback(null, post)
         })
         client.close()
