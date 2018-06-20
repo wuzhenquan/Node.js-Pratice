@@ -120,3 +120,23 @@ Post.update = function (name, day, title, post, callback) {
         client.close()
     })
 }
+
+// 删除文章
+Post.remove = function (name, day, title, callback) {
+    MongoClient.connect(settings.url, (err, client) => {
+        const db = client.db(settings.db)
+        const collection = db.collection('posts')
+        const query = {
+            name: name,
+            "time.day": day,
+            title: title
+        }
+        collection.remove(query, { w: 1 }, (err) => {
+            if (err) {
+                return callback(err)
+            }
+            callback(null)
+        })
+        client.close()
+    })
+}
