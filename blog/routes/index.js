@@ -24,7 +24,7 @@ function checkNotLogin(req, res, next) {
 
 module.exports = function (app) {
     app.get('/', (req, res) => {
-        Post.get(null, (err, posts) => {
+        Post.getAll(null, (err, posts) => {
             if (err) {
                 posts = []
             }
@@ -161,5 +161,46 @@ module.exports = function (app) {
     app.post('/upload', upload.array('file1'), (req, res) => {
         req.flash('success', '文件上传成功')
         res.redirect('/upload')
+    })
+    app.get('/u/:name', (req, res) => {
+        // 检查用户是否存在
+        console.log(req.params,'req.params')
+        User.get(req.params.name, (err, users) => {
+            const user = users[0]
+            if (!user || user.length === 0) {
+                req.flash('error', '用户不存在')
+                return res.redirect('/')
+            }
+            // 查询并返回该用户的所有文章
+            Post.getAll(user.name, (err, posts)=>{
+                if(err){
+                    req.flash('error', err)
+                    return res.redirect('/')
+                }
+                res.render('user', {
+                    title: user.name,
+                    posts: posts,
+                    user: req.session.user,
+                    success: req.flash('success').toString(),
+                    error: req.flash('error').toString()
+                })
+            })
+        })
+    })
+    app.get('/u/:name/:day/:title', (req, res) => {
+        console.log(req.params,'req.params')
+        Post.getOne(req.params.name, req.params.day, req.params.title, (err, post)=>{
+            if(err){
+                req.flash('error', err)
+                return res.redirect('/')
+            }
+            res.render('article', {
+                title: req.params.title,
+                post: post,
+                user: req.session.user,
+                success: req.flash('success').toString(),
+                error: req.flash('error').toString()
+            })
+        })
     })
 }

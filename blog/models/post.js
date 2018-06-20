@@ -39,23 +39,43 @@ Post.prototype.save = function (callback) {
     })
 }
 
-// 读取博客信息
-Post.get = function (name, callback) {
+// 读取所有博客信息
+Post.getAll = function (name, callback) {
     MongoClient.connect(settings.url, (err, client) => {
         const db = client.db(settings.db)
         const collection = db.collection('posts')
         const query = {}
-        if(name) query.name = name
+        if (name) query.name = name
         collection.find(query).sort({ time: -1 }).toArray((err, posts) => {
             if (err) {
                 return callback(err)
             }
-            posts = posts.map(post=>{
-                console.log(markdown,'markdown')
+            posts = posts.map(post => {
                 post.post = markdown.toHTML(post.post)
                 return post
             })
             callback(null, posts)
+        })
+        client.close()
+    })
+}
+
+// 读取单条博客信息
+Post.getOne = function (name, day, title, callback) {
+    MongoClient.connect(settings.url, (err, client) => {
+        const db = client.db(settings.db)
+        const collection = db.collection('posts')
+        const query = {
+            name: name,
+            "time.day": day,
+            title: title
+        }
+        collection.findOne(query, null, (err, post) => {
+            if (err) {
+                return callback(err)
+            }
+            post.post = markdown.toHTML(post.post)
+            callback(null, post)
         })
         client.close()
     })
