@@ -18,13 +18,14 @@ Post.prototype.save = function (callback) {
         year: date.getFullYear(),
         month: `${date.getFullYear()}-${date.getMonth() + 1}`,
         day: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
-        minute: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}_${date.getHours()}-${date.getMinutes() < 10 ? '0' : ''}${date.getMinutes()}`,
+        minute: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes() < 10 ? '0' : ''}${date.getMinutes()}`,
     }
     const post = {
         name: this.name,
         time: time,
         title: this.title,
-        post: this.post
+        post: this.post,
+        comments: []
     }
     MongoClient.connect(settings.url, (err, client) => {
         const db = client.db(settings.db)
@@ -74,7 +75,12 @@ Post.getOne = function (name, day, title, callback) {
             if (err) {
                 return callback(err)
             }
-            post.post = markdown.toHTML(post.post)
+            if(post){
+                post.post = markdown.toHTML(post.post)
+                post.comments.forEach(comment => {
+                    comment.content = markdown.toHTML(comment.content)
+                });
+            }
             callback(null, post)
         })
         client.close()

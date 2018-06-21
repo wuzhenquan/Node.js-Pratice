@@ -1,6 +1,7 @@
 const crypto = require('crypto') // Node.js 的核心模块，用来生成散列值来加密密码
 const User = require('../models/user')
 const Post = require('../models/post')
+const Comment = require('../models/comment')
 const multer = require('multer')
 const upload = multer({ dest: './public/images' })
 
@@ -164,7 +165,6 @@ module.exports = function (app) {
     })
     app.get('/u/:name', (req, res) => {
         // 检查用户是否存在
-        console.log(req.params,'req.params')
         User.get(req.params.name, (err, users) => {
             const user = users[0]
             if (!user || user.length === 0) {
@@ -172,8 +172,8 @@ module.exports = function (app) {
                 return res.redirect('/')
             }
             // 查询并返回该用户的所有文章
-            Post.getAll(user.name, (err, posts)=>{
-                if(err){
+            Post.getAll(user.name, (err, posts) => {
+                if (err) {
                     req.flash('error', err)
                     return res.redirect('/')
                 }
@@ -188,8 +188,8 @@ module.exports = function (app) {
         })
     })
     app.get('/u/:name/:day/:title', (req, res) => {
-        Post.getOne(req.params.name, req.params.day, req.params.title, (err, post)=>{
-            if(err){
+        Post.getOne(req.params.name, req.params.day, req.params.title, (err, post) => {
+            if (err) {
                 req.flash('error', err)
                 return res.redirect('/')
             }
@@ -205,8 +205,8 @@ module.exports = function (app) {
     app.get('/edit/:name/:day/:title', checkLogin)
     app.get('/edit/:name/:day/:title', (req, res) => {
         const currentUser = req.session.user
-        Post.edit(currentUser.name, req.params.day, req.params.title, (err, post)=>{
-            if(err){
+        Post.edit(currentUser.name, req.params.day, req.params.title, (err, post) => {
+            if (err) {
                 req.flash('error', err)
                 return res.redirect('back')
             }
@@ -222,9 +222,9 @@ module.exports = function (app) {
     app.post('/edit/:name/:day/:title', checkLogin)
     app.post('/edit/:name/:day/:title', (req, res) => {
         const currentUser = req.session.user
-        Post.update(currentUser.name, req.params.day, req.params.title, req.body.post, (err, post)=>{
+        Post.update(currentUser.name, req.params.day, req.params.title, req.body.post, (err, post) => {
             const url = encodeURI(`/u/${req.params.name}/${req.params.day}/${req.params.title}`)
-            if(err){
+            if (err) {
                 req.flash('error', err)
                 return res.redirect(url)
             }
@@ -235,13 +235,33 @@ module.exports = function (app) {
     app.get('/remove/:name/:day/:title', checkLogin)
     app.get('/remove/:name/:day/:title', (req, res) => {
         const currentUser = req.session.user
-        Post.remove(currentUser.name, req.params.day, req.params.title, (err, post)=>{
-            if(err){
+        Post.remove(currentUser.name, req.params.day, req.params.title, (err, post) => {
+            if (err) {
                 req.flash('error', err)
                 return res.redirect('back')
             }
             req.flash('success', '删除成功')
             res.redirect('/')
+        })
+    })
+    app.post('/u/:name/:day/:title', (req, res) => {
+        const date = new Date()
+        const time = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} ${date.getHours()}:${date.getMinutes() < 10 ? '0' : ''}${date.getMinutes()}`
+        const comment = {
+            name: req.body.name,
+            email: req.body.email,
+            website: req.body.website,
+            time: time,
+            content: req.body.content,
+        }
+        const newComment = new Comment(req.params.name, req.params.day, req.params.title, comment)
+        newComment.save((err)=>{
+            if(err){
+                req.flash('error', err)
+                return res.redirect('back');
+            }
+            req.flash('success', '留言成功')
+            res.redirect('back')
         })
     })
 }
