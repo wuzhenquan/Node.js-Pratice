@@ -35,29 +35,36 @@ Post.prototype.save = function (callback) {
                 return callback(err)
             }
             callback(null, post)
+            client.close()
         })
-        client.close()
     })
 }
 
 // 读取所有博客信息
-Post.getAll = function (name, callback) {
+Post.getTen = function (name, page, callback) {
     MongoClient.connect(settings.url, (err, client) => {
         const db = client.db(settings.db)
         const collection = db.collection('posts')
         const query = {}
         if (name) query.name = name
-        collection.find(query).sort({ time: -1 }).toArray((err, posts) => {
-            if (err) {
-                return callback(err)
-            }
-            posts = posts.map(post => {
-                post.post = markdown.toHTML(post.post)
-                return post
+        // 使用 count 返回特定查询的文档数
+        collection.count(query, (err, total) => {
+            // 根据 query 对象查询，并跳过前 (page-1)*10 个结果，返回之后的 10 个结果
+            collection.find(query, {
+                skip: (page - 1) * 10,
+                limit: 10
+            }).sort({ time: -1 }).toArray((err, posts) => {
+                if (err) {
+                    return callback(err)
+                }
+                posts = posts.map(post => {
+                    post.post = markdown.toHTML(post.post)
+                    return post
+                })
+                callback(null, posts, total)
             })
-            callback(null, posts)
+            client.close() // 这一句一定不要放在外边，会出问题的。
         })
-        client.close()
     })
 }
 
@@ -75,15 +82,15 @@ Post.getOne = function (name, day, title, callback) {
             if (err) {
                 return callback(err)
             }
-            if(post){
+            if (post) {
                 post.post = markdown.toHTML(post.post)
                 post.comments.forEach(comment => {
                     comment.content = markdown.toHTML(comment.content)
                 });
             }
             callback(null, post)
+            client.close()
         })
-        client.close()
     })
 }
 
@@ -102,8 +109,8 @@ Post.edit = function (name, day, title, callback) {
                 return callback(err)
             }
             callback(null, post)
+            client.close()
         })
-        client.close()
     })
 }
 
@@ -122,8 +129,8 @@ Post.update = function (name, day, title, post, callback) {
                 return callback(err)
             }
             callback(null, post)
+            client.close()
         })
-        client.close()
     })
 }
 
@@ -142,7 +149,7 @@ Post.remove = function (name, day, title, callback) {
                 return callback(err)
             }
             callback(null)
+            client.close()
         })
-        client.close()
     })
 }

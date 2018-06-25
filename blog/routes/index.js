@@ -25,7 +25,8 @@ function checkNotLogin(req, res, next) {
 
 module.exports = function (app) {
     app.get('/', (req, res) => {
-        Post.getAll(null, (err, posts) => {
+        const page = req.query.p ? parseInt(req.query.p) : 1
+        Post.getTen(null, page, (err, posts, total) => {
             if (err) {
                 posts = []
             }
@@ -33,6 +34,9 @@ module.exports = function (app) {
                 title: 'home',
                 user: req.session.user || null,
                 posts: posts,
+                page: page,
+                isFirstPage: (page - 1) == 0,
+                isLastPage: ((page - 1) * 10 + posts.length) == total,
                 success: req.flash('success').toString(),
                 error: req.flash('error').toString()
             })
@@ -164,6 +168,7 @@ module.exports = function (app) {
         res.redirect('/upload')
     })
     app.get('/u/:name', (req, res) => {
+        const page = req.query.p ? parseInt(req.query.p) : 1
         // 检查用户是否存在
         User.get(req.params.name, (err, users) => {
             const user = users[0]
@@ -172,7 +177,7 @@ module.exports = function (app) {
                 return res.redirect('/')
             }
             // 查询并返回该用户的所有文章
-            Post.getAll(user.name, (err, posts) => {
+            Post.getTen(user.name, page, (err, posts, total) => {
                 if (err) {
                     req.flash('error', err)
                     return res.redirect('/')
@@ -181,6 +186,8 @@ module.exports = function (app) {
                     title: user.name,
                     posts: posts,
                     user: req.session.user,
+                    isFirstPage: (page - 1) == 0,
+                    isLastPage: ((page - 1) * 10 + posts.length) == total,
                     success: req.flash('success').toString(),
                     error: req.flash('error').toString()
                 })
@@ -255,8 +262,8 @@ module.exports = function (app) {
             content: req.body.content,
         }
         const newComment = new Comment(req.params.name, req.params.day, req.params.title, comment)
-        newComment.save((err)=>{
-            if(err){
+        newComment.save((err) => {
+            if (err) {
                 req.flash('error', err)
                 return res.redirect('back');
             }
