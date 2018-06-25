@@ -153,3 +153,23 @@ Post.remove = function (name, day, title, callback) {
         })
     })
 }
+
+// 返回所有文章存档信息
+Post.getArchive = function (callback) {
+    MongoClient.connect(settings.url, (err, client) => {
+        const db = client.db(settings.db)
+        const collection = db.collection('posts')
+        collection.find({}, {
+            name: 1,
+            time: 1,
+            title: 1
+        }).sort({ time: -1 }).toArray((err, posts) => {
+            if (err) {
+                return callback(err)
+            }
+            callback(null, posts);
+            
+        })
+        client.close()
+    })
+}

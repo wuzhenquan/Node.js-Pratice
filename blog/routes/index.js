@@ -271,4 +271,19 @@ module.exports = function (app) {
             res.redirect('back')
         })
     })
+    app.get('/archive', (req, res) => {
+        Post.getArchive((err, posts) => {
+            if (err) {
+                req.flash('error', err)
+                return res.redirect('/')
+            }
+            res.render('archive', {
+                title: '存档',
+                posts: posts,
+                user: req.session.user,
+                success: req.flash('success').toString(),
+                error: req.flash('error').toString()
+            })
+        })
+    })
 }
