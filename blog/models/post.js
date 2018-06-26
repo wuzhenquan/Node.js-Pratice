@@ -27,7 +27,8 @@ Post.prototype.save = function (callback) {
         title: this.title,
         tags: this.tags,
         post: this.post,
-        comments: []
+        comments: [],
+        pv: 0
     }
     MongoClient.connect(settings.url, (err, client) => {
         const db = client.db(settings.db)
@@ -70,7 +71,7 @@ Post.getTen = function (name, page, callback) {
     })
 }
 
-// 读取单条博客信息(HTML 格式)
+// 获取一篇文章
 Post.getOne = function (name, day, title, callback) {
     MongoClient.connect(settings.url, (err, client) => {
         const db = client.db(settings.db)
@@ -85,6 +86,16 @@ Post.getOne = function (name, day, title, callback) {
                 return callback(err)
             }
             if (post) {
+                // 每访问一次，pv 值增加 1
+                collection.update({
+                    name: name,
+                    "time.day": day,
+                    title: title
+                }, { $inc: { pv: 1 } }, (err) => {
+                    if (err) {
+                        return callback(err)
+                    }
+                })
                 post.post = markdown.toHTML(post.post)
                 post.comments.forEach(comment => {
                     comment.content = markdown.toHTML(comment.content)
