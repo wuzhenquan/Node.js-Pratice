@@ -133,9 +133,11 @@ module.exports = function (app) {
     app.post('/post', checkLogin)
     app.post('/post', (req, res) => {
         const currentUser = req.session.user
+        const tags = [req.body.tag1, req.body.tag2, req.body.tag3]
         const newPost = new Post({
             name: currentUser.name,
             title: req.body.title,
+            tags,
             post: req.body.post,
         })
         newPost.save((err, post) => {
@@ -279,6 +281,36 @@ module.exports = function (app) {
             }
             res.render('archive', {
                 title: '存档',
+                posts: posts,
+                user: req.session.user,
+                success: req.flash('success').toString(),
+                error: req.flash('error').toString()
+            })
+        })
+    })
+    app.get('/tags', (req, res) => {
+        Post.getTags((err, tags) => {
+            if (err) {
+                req.flash('error', err)
+                return res.redirect('/')
+            }
+            res.render('tags', {
+                title: '标签',
+                tags: tags,
+                user: req.session.user,
+                success: req.flash('success').toString(),
+                error: req.flash('error').toString()
+            })
+        })
+    })
+    app.get('/tags/:tag', (req, res) => {
+        Post.getTag(req.params.tag, (err, posts) => {
+            if (err) {
+                req.flash('error', err)
+                return res.redirect('/')
+            }
+            res.render('tag', {
+                title: `TAG:${req.params.tag}`,
                 posts: posts,
                 user: req.session.user,
                 success: req.flash('success').toString(),

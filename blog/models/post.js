@@ -5,6 +5,7 @@ const markdown = require('markdown').markdown
 function Post(post) {
     this.name = post.name
     this.title = post.title
+    this.tags = post.tags
     this.post = post.post
 }
 
@@ -24,6 +25,7 @@ Post.prototype.save = function (callback) {
         name: this.name,
         time: time,
         title: this.title,
+        tags: this.tags,
         post: this.post,
         comments: []
     }
@@ -168,7 +170,42 @@ Post.getArchive = function (callback) {
                 return callback(err)
             }
             callback(null, posts);
-            
+        })
+        client.close()
+    })
+}
+
+// 返回所有标签
+Post.getTags = function (callback) {
+    MongoClient.connect(settings.url, (err, client) => {
+        const db = client.db(settings.db)
+        const collection = db.collection('posts')
+        // distinct 用来找出给定键的所有不同价值
+        collection.distinct('tags', (err, tags) => {
+            if (err) {
+                return callback(err)
+            }
+            callback(null, tags)
+        })
+        client.close()
+    })
+}
+
+// 返回含有特点标签的所有文章
+Post.getTag = function (tag, callback) {
+    MongoClient.connect(settings.url, (err, client) => {
+        const db = client.db(settings.db)
+        const collection = db.collection('posts')
+        const query = { tags: tag }
+        collection.find(query, {
+            name: 1,
+            time: 1,
+            title: 1
+        }).sort({ time: -1 }).toArray((err, posts) => {
+            if (err) {
+                return callback(err)
+            }
+            callback(null, posts);
         })
         client.close()
     })
