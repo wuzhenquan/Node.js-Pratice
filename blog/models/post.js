@@ -221,3 +221,23 @@ Post.getTag = function (tag, callback) {
         client.close()
     })
 }
+
+// 返回通过标题关键字查询的所有文章信息
+Post.search = function (keyword, callback) {
+    MongoClient.connect(settings.url, (err, client) => {
+        const db = client.db(settings.db)
+        const collection = db.collection('posts')
+        const query = { title: new RegExp(keyword, "i") } // 正则匹配
+        collection.find(query, {
+            name: 1,
+            time: 1,
+            title: 1
+        }).sort({ time: -1 }).toArray((err, posts) => {
+            if (err) {
+                return callback(err)
+            }
+            callback(null, posts);
+        })
+        client.close()
+    })
+}
