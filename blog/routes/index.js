@@ -5,25 +5,31 @@ const Comment = require('../models/comment')
 const multer = require('multer')
 const upload = multer({ dest: './public/images' })
 
-// 登陆了才能 next()
-function checkLogin(req, res, next) {
-    if (!req.session.user) {
-        req.flash('error', '未登录')
-        res.redirect('/login')
-    }
-    next()
-}
-
-// 没登陆才能 next()
-function checkNotLogin(req, res, next) {
-    if (req.session.user) {
-        req.flash('error', '已登录')
-        res.redirect('back') // 返回之前的页面
-    }
-    next()
-}
 
 module.exports = function (app) {
+
+    app.use((req, res) => {
+        res.render('404')
+    })
+
+    // 登陆了才能 next()
+    function checkLogin(req, res, next) {
+        if (!req.session.user) {
+            req.flash('error', '未登录')
+            res.redirect('/login')
+        }
+        next()
+    }
+
+    // 没登陆才能 next()
+    function checkNotLogin(req, res, next) {
+        if (req.session.user) {
+            req.flash('error', '已登录')
+            res.redirect('back') // 返回之前的页面
+        }
+        next()
+    }
+
     app.get('/', (req, res) => {
         const page = req.query.p ? parseInt(req.query.p) : 1
         Post.getTen(null, page, (err, posts, total) => {
