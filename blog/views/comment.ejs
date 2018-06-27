@@ -1,10 +1,11 @@
 <br/>
 <% post.comments.forEach((comment, index)=>{ %>
 <p>
+    <img src="<%= comment.head %>" class="l_head">
     <a href="<% comment.website %>"><%= comment.name %></a>
     <span class="info"> 回复于 <%= comment.time %></span>
-    <span><%- comment.content %></span>
 </p>
+<p><span><%- comment.content %></span></p>
 <% }) %>
 
 <form method="post">

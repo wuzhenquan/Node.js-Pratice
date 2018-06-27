@@ -4,6 +4,7 @@ const markdown = require('markdown').markdown
 
 function Post(post) {
     this.name = post.name
+    this.head = post.head
     this.title = post.title
     this.tags = post.tags
     this.post = post.post
@@ -23,6 +24,7 @@ Post.prototype.save = function (callback) {
     }
     const post = {
         name: this.name,
+        head: this.head,
         time: time,
         title: this.title,
         tags: this.tags,

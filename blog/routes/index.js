@@ -8,9 +8,6 @@ const upload = multer({ dest: './public/images' })
 
 module.exports = function (app) {
 
-    app.use((req, res) => {
-        res.render('404')
-    })
 
     // 登陆了才能 next()
     function checkLogin(req, res, next) {
@@ -142,6 +139,7 @@ module.exports = function (app) {
         const tags = [req.body.tag1, req.body.tag2, req.body.tag3]
         const newPost = new Post({
             name: currentUser.name,
+            head: currentUser.head,
             title: req.body.title,
             tags,
             post: req.body.post,
@@ -262,8 +260,12 @@ module.exports = function (app) {
     app.post('/u/:name/:day/:title', (req, res) => {
         const date = new Date()
         const time = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()} ${date.getHours()}:${date.getMinutes() < 10 ? '0' : ''}${date.getMinutes()}`
+        const md5 = crypto.createHash('md5')
+        const email_MD5 = md5.update(req.body.email.toLowerCase()).digest('hex')
+        const head = `http://www.gravatar.com/avatar/${email_MD5}?s=48`
         const comment = {
             name: req.body.name,
+            head: head,
             email: req.body.email,
             website: req.body.website,
             time: time,
@@ -338,5 +340,9 @@ module.exports = function (app) {
                 error: req.flash('error').toString()
             })
         })
+    })
+
+    app.use((req, res) => {
+        res.render('404')
     })
 }
