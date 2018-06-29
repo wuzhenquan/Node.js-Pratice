@@ -30,6 +30,7 @@ Post.prototype.save = function (callback) {
         tags: this.tags,
         post: this.post,
         comments: [],
+        reprint_info: {},
         pv: 0
     }
     MongoClient.connect(settings.url, (err, client) => {
@@ -154,12 +155,48 @@ Post.remove = function (name, day, title, callback) {
     MongoClient.connect(settings.url, (err, client) => {
         const db = client.db(settings.db)
         const collection = db.collection('posts')
-        const query = {
+
+        // 要删除一篇转载来的文章时， 还要将被转载的原文章所在的文档的 reprint_to 删除遗留的转载信息
+        // 查询要删除的文档
+        collection.findOne({
             name: name,
             "time.day": day,
             title: title
-        }
-        collection.remove(query, { w: 1 }, (err) => {
+        }, (err, post)=>{
+            if (err) {
+                return callback(err)
+            }
+            // 如果有 print_from(文章转载的)，先保存下来 reprint_from
+            let reprint_from = ''
+            if(post.reprint_info.reprint_from){
+                reprint_from = post.reprint_info.reprint_from
+            }
+            if(reprint_from != ''){
+                // 更新原文章所在文档的 reprint_to
+                collection.update({
+                    name: reprint_from.name,
+                    "time.day": reprint_from.day,
+                    title: reprint_from.title
+                },{
+                    $pull: {
+                        'reprint_info.reprint_to': {
+                            name: name,
+                            day: day,
+                            title: title
+                        }
+                    }
+                })
+            }
+
+            client.close()
+        })
+
+        // 删除文章
+        collection.remove({
+            name: name,
+            "time.day": day,
+            title: title
+        }, { w: 1 }, (err) => {
             if (err) {
                 return callback(err)
             }
@@ -241,5 +278,75 @@ Post.search = function (keyword, callback) {
             callback(null, posts);
         })
         client.close()
+    })
+}
+
+// 转载一篇文章
+Post.reprint = function (reprint_from, reprint_to, callback) {
+    MongoClient.connect(settings.url, (err, client) => {
+        const db = client.db(settings.db)
+        const collection = db.collection('posts')
+        // 找到被转载的文章的原文档
+        collection.findOne({
+            name: reprint_from.name,
+            "time.day": reprint_from.day,
+            title: reprint_from.title,
+        }, (err, post) => {
+            if (err) {
+                client.close()
+                return callback(err)
+            }
+            const date = new Date();
+            const time = {
+                date: date,
+                year: date.getFullYear(),
+                month: `${date.getFullYear()}-${date.getMonth() + 1}`,
+                day: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`,
+                minute: `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes() < 10 ? '0' : ''}${date.getMinutes()}`,
+            }
+
+            delete post._id // 注意要删掉原来的 _id
+
+            post.name = reprint_to.name
+            post.head = reprint_to.head
+            post.time = time
+            post.title = (post.title.search(/[转载]/) > -1) ? post.title : `[转载]${post.title}`
+            post.comments = []
+            post.reprint_info = { reprint_from }
+            post.pv = 0
+
+            // 更新被转载的原文档的 reprint_info 内的 reprint_to 
+            collection.update(
+                {
+                    name: reprint_from.name,
+                    "time.day": reprint_from.day,
+                    title: reprint_from.title,
+                }, {
+                    $push: {
+                        "reprint_info.reprint_to": {
+                            name: post.name,
+                            day: time.day,
+                            title: post.title
+                        }
+                    }
+                }, (err) => {
+                    if (err) {
+                        client.close()
+                        return callback(err)
+                    }
+                }
+            )
+
+            // 将转载生成的副本修改后存入数据库， 并返回存储后的文档
+            collection.insert(post, {
+                safe: true,
+            }, (err, post)=>{
+                client.close()
+                if(err){
+                    return callback(err)
+                }
+                callback(null, post.ops[0])
+            })
+        })
     })
 }

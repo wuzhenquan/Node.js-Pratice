@@ -342,6 +342,28 @@ module.exports = function (app) {
         })
     })
 
+    app.get('/reprint/:name/:day/:title', checkLogin);
+    app.get('/reprint/:name/:day/:title', (req, res) => {
+        Post.edit(req.params.name, req.params.day, req.params.title, (err, post) => {
+            if (err) {
+                req.flash('error', err)
+                return res.redirect('back')
+            }
+            const currentUser = req.session.user
+            const reprint_from = { name: post.name, day: post.time.day, title: post.title }
+            const reprint_to = { name: currentUser.name, head: currentUser.head }
+            Post.reprint(reprint_from, reprint_to, (err, post) => {
+                if (err) {
+                    req.flash('error', err)
+                    return res.redirect('back')
+                }
+                req.flash('success', '转载成功')
+                const url = encodeURI(`/u/${post.name}/${post.time.day}/${post.title}`)
+                res.redirect(url)
+            })
+        })
+    });
+
     app.use((req, res) => {
         res.render('404')
     })
