@@ -1,0 +1,21 @@
+{
+  "name": "technode",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "巫镇泉 <wuzhenquan1990@gmail.com>"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/wuzhenquan/Node.js-Pratice",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "3.0.3",
+    "angular": "1.2.5"
+  }
+}

@@ -12,9 +12,10 @@ module.exports = {
     },
     "globals": {
         "window": true,
-        "io":true,
-        "prompt":true,
-        "document":true
+        "io": true,
+        "prompt": true,
+        "document": true,
+        "angular": true
     },
     "extends": [
         "eslint:recommended",

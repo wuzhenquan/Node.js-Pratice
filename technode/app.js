@@ -10,14 +10,21 @@ const port = process.env.PORT || 3000
 // 服务端不关心路由，所有的路由都交给在浏览器端的 JS 去处理
 app.use(express.static(path.join(__dirname, '/static')))
 app.use((req, res) => {
-    res.sendFile(path.join(__dirname, './static/html'))
+    res.sendFile(path.join(__dirname, './static/index.html'))
 })
-
-// 在服务端增加 Socket 服务
 const server = app.listen(port, () => {
     console.log(`technode is on port ${port}`)
 })
-const io = require('socket.io').listen(server)
-io.sockets.on('connection', (socket) => {
-    socket.emit('connected')
+
+// 在服务端增加 Socket 服务
+var io = require('socket.io').listen(server)
+var messages = []
+io.sockets.on('connection', function(socket) {
+  socket.on('messages.read', function() {
+    socket.emit('messages.read', messages)
+  })
+  socket.on('messages.create', function(message) {
+    messages.push(message)
+    io.sockets.emit('messages.add', message)
+  })
 })
