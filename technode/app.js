@@ -7,6 +7,11 @@ var cookieParse = require('cookie-parser')
 var session = require('express-session')
 var Controllers = require('./controllers')
 var logger = require('morgan')
+var signedCookieParser = cookieParse('technode')
+var MongoStore = require('connect-mongo')(session)
+var sessionStore = new MongoStore({
+    url: 'mongodb://localhost/technode'
+})
 
 
 app.use(logger('dev'))
@@ -20,6 +25,7 @@ app.use(session({
     resave: true,
     saveUninitialized: false,
     cookie: { maxAge: 1000 * 60 * 60 * 24 * 30 }, // 30 days
+    store: sessionStore
 }))
 // 与通常的 Express 项目一样， 我们将静态文件放在 static 目录下。
 // 在 static 目录下还会放 index.html 文件作为整个应用的启动页面。
@@ -68,6 +74,27 @@ const server = app.listen(port, () => {
 
 // 在服务端增加 Socket 服务
 var io = require('socket.io').listen(server)
+
+io.set('authorization', function (handshakeData, accept) {
+    signedCookieParser(handshakeData, {}, function (err) {
+        if (err) {
+            accept(err, false)
+        } else {
+            sessionStore.get(handshakeData.signedCookies['connect.sid'], function (err, session) {
+                if (err) {
+                    accept(err.message, false)
+                } else {
+                    handshakeData.session = session
+                    if (session._userId) {
+                        accept(null, true)
+                    } else {
+                        accept('No login')
+                    }
+                }
+            })
+        }
+    })
+})
 var messages = []
 io.sockets.on('connection', function (socket) {
     socket.on('messages.read', function () {
