@@ -4,7 +4,7 @@ angular.module('techNodeApp').controller('MessageCreatorCtrl', function ($scope,
     // createMessage 是通过 ctrl-enter-break-line 与 textarea 直接绑定的
     $scope.createMessage = function () {
         socket.emit('messages.create', {
-            message: $scope.newMessage,
+            content: $scope.newMessage,
             creator: $scope.me
         })
         $scope.newMessage = ''

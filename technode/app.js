@@ -54,7 +54,13 @@ app.post('/api/login', function (req, res) {
                 res.status(500).json({ msg: err })
             } else {
                 req.session._userId = user._id
-                res.json(user)
+                Controllers.User.online(user._id, function (err, user) {
+                    if (err) {
+                        res.json(500, { msg: err })
+                    } else {
+                        res.json(user)
+                    }
+                })
             }
         })
     } else {
@@ -62,8 +68,15 @@ app.post('/api/login', function (req, res) {
     }
 })
 app.get('/api/logout', function (req, res) {
-    req.session._userId = null
-    res.status(401).json(null)
+    var _userId = req.session._userId
+    Controllers.User.offline(_userId, function (err, user) {
+        if (err) {
+            res.json(500, { msg: err })
+        } else {
+            res.json(200)
+            delete req.session._userId
+        }
+    })
 })
 app.use((req, res) => {
     res.sendFile(path.join(__dirname, './static/index.html'))
@@ -97,11 +110,42 @@ io.set('authorization', function (handshakeData, accept) {
 })
 var messages = []
 io.sockets.on('connection', function (socket) {
+    var _userId = socket.request.session._userId
+    Controllers.User.online(_userId, function (err, user) {
+        if (err) {
+            socket.emit('err', { mesg: err })
+        } else {
+            socket.broadcast.emit('online', user)
+        }
+    })
+
     socket.on('messages.read', function () {
         socket.emit('messages.read', messages)
     })
     socket.on('messages.create', function (message) {
         messages.push(message)
         io.sockets.emit('messages.add', message)
+    })
+
+    socket.on('getRoom', function () {
+        Controllers.User.getOnlineUsers(function (err, users) {
+            if (err) {
+                socket.emit('err', { msg: err })
+            } else {
+                socket.emit('roomData', {
+                    users: users,
+                    messages: messages
+                })
+            }
+        })
+    })
+    socket.on('disconnect', function () {
+        Controllers.User.offline(_userId, function (err, user) {
+            if (err) {
+                socket.emit('err', { msg: err })
+            }else{
+                socket.emit('offline', user)
+            }
+        })
     })
 })

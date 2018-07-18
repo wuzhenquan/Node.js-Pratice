@@ -15,7 +15,7 @@ angular.module('techNodeApp', ['ngRoute']).run(function ($window, $rootScope, $h
 
     $rootScope.logout = function(){
         $http({
-            url: '/ajax/logout',
+            url: '/api/logout',
             method: 'GET'
         }).success(function (user) {
             $rootScope.me = null
