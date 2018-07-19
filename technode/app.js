@@ -117,6 +117,11 @@ io.sockets.on('connection', function (socket) {
             socket.emit('err', { mesg: err })
         } else {
             socket.broadcast.emit('online', user)
+            socket.broadcast.emit('messages.add', {
+                content: user.name + '进入了聊天室',
+                creator: { name: 'SYSTEM' },
+                createAt: new Date()
+            })
         }
     })
 
@@ -163,6 +168,11 @@ io.sockets.on('connection', function (socket) {
                 socket.emit('err', { msg: err })
             } else {
                 socket.emit('offline', user)
+                socket.emit('message.add', {
+                    content: user.name + '离开了聊天室',
+                    creator: { name: 'SYSTEM' },
+                    createAt: new Date()
+                })
             }
         })
     })
