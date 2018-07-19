@@ -12,6 +12,7 @@ var MongoStore = require('connect-mongo')(session)
 var sessionStore = new MongoStore({
     url: 'mongodb://localhost/technode'
 })
+var async = require('async')
 
 
 app.use(logger('dev'))
@@ -123,27 +124,44 @@ io.sockets.on('connection', function (socket) {
         socket.emit('messages.read', messages)
     })
     socket.on('messages.create', function (message) {
-        messages.push(message)
-        io.sockets.emit('messages.add', message)
+        Controllers.Message.create(message, function (err, message) {
+            if (err) {
+                socket.emit('err', {
+                    msa: err
+                })
+            } else {
+                io.sockets.emit('messages.add', message)
+            }
+        })
     })
 
     socket.on('getRoom', function () {
-        Controllers.User.getOnlineUsers(function (err, users) {
-            if (err) {
-                socket.emit('err', { msg: err })
-            } else {
-                socket.emit('roomData', {
-                    users: users,
-                    messages: messages
-                })
+        async.parallel([
+            function (done) {
+                Controllers.User.getOnlineUsers(done)
+            },
+            function (done) {
+                Controllers.Message.read(done)
             }
-        })
+        ],
+            function (err, results) {
+                if (err) {
+                    socket.emit('err', {
+                        msg: err
+                    })
+                } else {
+                    socket.emit('roomData', {
+                        users: results[0],
+                        messages: results[1]
+                    })
+                }
+            });
     })
     socket.on('disconnect', function () {
         Controllers.User.offline(_userId, function (err, user) {
             if (err) {
                 socket.emit('err', { msg: err })
-            }else{
+            } else {
                 socket.emit('offline', user)
             }
         })

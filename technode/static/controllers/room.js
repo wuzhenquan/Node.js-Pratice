@@ -9,6 +9,7 @@ angular.module('techNodeApp').controller('RoomCtrl', function ($scope, socket) {
 
     socket.on('roomData', function(room){
         $scope.room = room
+        $scope.messages = room.messages
     })
     socket.emit('getRoom')
     socket.on('online', function(user){

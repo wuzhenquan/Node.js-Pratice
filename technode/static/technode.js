@@ -1,5 +1,6 @@
 
 angular.module('techNodeApp', ['ngRoute']).run(function ($window, $rootScope, $http, $location) {
+    $window.moment.lang('zh-cn')
     // 应用启动时验证 ‘/api/validate' 接口
     // 如果用户已登录 请求 ‘/’ url
     // 如果用户未登录 请求 ‘/login' url
