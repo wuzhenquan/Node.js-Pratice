@@ -1,14 +1,12 @@
 var db = require('../models')
 
 exports.create = function (messageObj, callback) {
-    var message = new db.Message()
-    message.content = messageObj.content
-    message.creator = messageObj.creator
+    var message = new db.Message(messageObj)
     message.save(callback)
 }
 
-exports.read = function (callback) {
-    db.Message.find({}, null, {
+exports.read = function (room, callback) {
+    db.Message.find({_roomId: room.id}, null, {
         sort: {
             'createAt': -1
         },

@@ -40,8 +40,32 @@ exports.offline = function (_userId, callback) {
     )
 }
 
-exports.getOnlineUsers = function(callback){
+exports.getOnlineUsers = function (callback) {
     db.User.find({
         online: true
     }, callback)
+}
+
+exports.joinRoom = function (join, callback) {
+    db.User.findOneAndUpdate(
+        { _id: join.user._id },
+        {
+            $set: {
+                online: true,
+                _roomId: join.room._id
+            }
+        },
+        callback
+    )
+}
+
+exports.leaveRoom = function (leave, callback) {
+    db.User.findOneAndUpdate({
+        _id: leave.user._id
+    }, {
+            $set: {
+                online: true,
+                _roomId: null
+            }
+        }, callback)
 }

@@ -15,7 +15,8 @@ module.exports = {
         "io": true,
         "prompt": true,
         "document": true,
-        "angular": true
+        "angular": true,
+        "ObjectId": true
     },
     "extends": [
         "eslint:recommended",

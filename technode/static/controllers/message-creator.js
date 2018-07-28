@@ -5,7 +5,8 @@ angular.module('techNodeApp').controller('MessageCreatorCtrl', function ($scope,
     $scope.createMessage = function () {
         socket.emit('messages.create', {
             content: $scope.newMessage,
-            creator: $scope.me
+            creator: $scope.me,
+            _roomId: $scope.room._id
         })
         $scope.newMessage = ''
     }
