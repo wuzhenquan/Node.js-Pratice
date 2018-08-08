@@ -28,6 +28,9 @@ exports.throw = function (bottle, callback) {
 
 // 捡一个漂流瓶
 exports.pick = function (info, callback) {
+    if (Math.random() <= 0.2) {
+        return callback({ code: 0, msg: "海星" })
+    }
     var type = { all: Math.round(Math.random()), male: 0, female: 0 };
     info.type = info.type || 'all';
     // 根据请求的瓶子类型到不同的数据库中取
@@ -35,7 +38,7 @@ exports.pick = function (info, callback) {
         // 随机返回一个漂流瓶 id
         client.RANDOMKEY(function (err, bottleId) {
             if (!bottleId) {
-                return callback({ code: 0, msg: "大海空空如也.." });
+                return callback({ code: 0, msg: "海星" });
             }
             // 根据漂流瓶 id 取到漂流瓶完整信息
             // HGETALL 命令用于返回哈希表中所有的键和值
