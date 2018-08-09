@@ -7,7 +7,7 @@ var app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
-}))
+}));
 
 // 扔一个漂流瓶
 // POST owner=xxx&type=xxx&content=xxx[&time=xxx]
@@ -20,7 +20,7 @@ app.post('/', function (req, res) {
     }
     redis.throw(req.body, function (result) {
         res.json(result);
-    })
+    });
 })
 
 // 捡一个漂流瓶
@@ -36,37 +36,56 @@ app.get('/', function (req, res) {
         if (result.code == 1) {
             mongodb.save(req.query.user, result.msg, function (err) {
                 if (err) {
-                    return res.json({ code: 0, msg: '获取漂流瓶失败，请重试' })
+                    return res.json({ code: 0, msg: '获取漂流瓶失败，请重试' });
                 }
-                return res.json(result)
-            })
+                return res.json(result);
+            });
         }
         res.json(result);
-    })
-})
+    });
+});
 
 // 扔回海里的一个漂流瓶
 // POST owner=xxx&type=xxx&content=xxx&time=xxx
 app.post('/back', function (req, res) {
     redis.throwBack(req.body, function (result) {
-        res.json(result)
-    })
-})
+        res.json(result);
+    });
+});
 
 // 获取一个用户所有的漂流瓶
 // GET /user/wuzhenquan
 app.get('/user/:user', function (req, res) {
     mongodb.getAll(req.params.user, function (result) {
-        res.json(result)
-    })
-})
+        res.json(result);
+    });
+});
 
 // 获取特定 id 的漂流瓶
 // GET /bottle/728374982739842398
 app.get('/bottle/:_id', function (req, res) {
     mongodb.getOne(req.params._id, function (result) {
-        res.json(result)
-    })
-})
+        res.json(result);
+    });
+});
 
-app.listen(3000)
+// 回复特定 id 的漂流瓶
+// POST user=xxx&&content=xxx[$time=xxx]
+app.post('/reply/:id', function(req, res){
+    if(!(req.body.user && req.body.content)){
+        return res.json({code: 0, msg: "回复信息不完整！"});
+    }
+    mongodb.reply(req.params._id, req.body, function(result){
+        res.json(result);
+    });
+});
+
+// 删除特定 id 的漂流瓶
+// GET /delete/7592735897239853
+app.get('/delete/:_id', function(req, res){
+    mongodb.delete(req.params._id, function(result){
+        res.json(result);
+    });
+});
+
+app.listen(3000);
