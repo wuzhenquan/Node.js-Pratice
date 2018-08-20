@@ -62,5 +62,6 @@ module.exports = {
         // "react/prop-types": "warn",
         "no-class-assign": "warn",
         "no-console": "warn",
+        "require-yield": "warn"
     }
 };

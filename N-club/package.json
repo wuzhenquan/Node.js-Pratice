@@ -1,0 +1,38 @@
+{
+  "name": "N-club",
+  "version": "0.0.1",
+  "description": "N-club for koa.",
+  "scripts": {
+    "preinstall": "cd theme && npm install",
+    "start": "NODE_ENV=default DEBUG=* node --harmony app",
+    "test": "./node_modules/mocha/bin/mocha --require co-mocha"
+  },
+  "dependencies": {
+    "co-cache": "^2.5.0",
+    "co-ejs": "^1.5.2",
+    "config-lite": "^2.1.0",
+    "koa": "^2.5.2",
+    "koa-bodyparser": "^4.2.1",
+    "koa-errorhandler": "^0.1.1",
+    "koa-flash": "^1.0.0",
+    "koa-frouter": "^0.5.0",
+    "koa-generic-session": "^2.0.1",
+    "koa-generic-session-mongo": "^0.4.0",
+    "koa-gzip": "^0.1.0",
+    "koa-logger": "^3.2.0",
+    "koa-router-cache": "^2.0.0",
+    "koa-scheme": "^2.2.1",
+    "koa-static-cache": "^5.1.2",
+    "merge-descriptors": "^1.0.1",
+    "mongoose": "^5.2.9",
+    "validator": "^10.6.0"
+  },
+  "devDependencies": {
+    "co-mocha": "^1.2.2",
+    "co-supertest": "0.0.10",
+    "mocha": "^5.2.0"
+  },
+  "engines": {
+    "node": ">=4"
+  }
+}
