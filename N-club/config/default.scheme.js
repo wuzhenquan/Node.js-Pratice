@@ -12,6 +12,16 @@ module.exports = {
       "body": checkSignupBody
     }
   },
+  "(GET|POST) /signin": {
+    "request": {
+      "session": checkNotLogin
+    }
+  },
+  "POST /signin": {
+    "request": {
+      "body": checkSigninBody
+    }
+  },
 };
 
 function md5 (str) {
