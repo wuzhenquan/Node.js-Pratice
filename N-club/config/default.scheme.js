@@ -22,6 +22,16 @@ module.exports = {
       "body": checkSigninBody
     }
   },
+  "(GET|POST) /create": {
+    "request": {
+      "session": checkLogin
+    }
+  },
+  "POST /create": {
+    "request": {
+      "body": checkCreateBody
+    }
+  },
 };
 
 function md5 (str) {
