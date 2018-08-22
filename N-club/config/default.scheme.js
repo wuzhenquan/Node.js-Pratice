@@ -32,6 +32,12 @@ module.exports = {
       "body": checkCreateBody
     }
   },
+  "POST /topic/:id": {
+    "request": {
+      "session": checkLogin,
+      "body": checkReplyTopic
+    }
+  }
 };
 
 function md5 (str) {
